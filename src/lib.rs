@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Block, FnArg, Ident, ItemFn, ReturnType, Type};
+use syn::{parse_macro_input, Block, Expr, ExprCall, FnArg, ItemFn, ReturnType, Stmt, Type};
 
 #[proc_macro_attribute]
 pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
@@ -26,7 +26,8 @@ pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
 
     let args_type = quote! {
         (#(#tuple_args),*)
-    }.into();
+    }
+    .into();
 
     let args_type = parse_macro_input!(args_type as Type);
 
@@ -35,42 +36,57 @@ pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
             let temp = quote! { () }.into();
             Box::new(parse_macro_input!(temp as Type))
         }
-        ReturnType::Type(_, t) => {
-            t.to_owned()
-        }
+        ReturnType::Type(_, t) => t.to_owned(),
     });
 
     let new_arg = quote! {
         _visited: &mut std::collections::HashMap<#args_type, #return_type>
-    }.into();
+    }
+    .into();
 
     inside.sig.inputs.push(parse_macro_input!(new_arg as FnArg));
 
-    let inside_fn_ident = quote! { inside }.into();
+    let fn_ident = &inside.sig.ident;
 
-    let inside_fn_ident = parse_macro_input!(inside_fn_ident as Ident);
-
-    inside.sig.ident = inside_fn_ident;
+    for i in &mut inside.block.stmts {
+        if let Stmt::Expr(
+            Expr::Call(ExprCall {
+                attrs: _,
+                func,
+                paren_token: _,
+                args,
+            }),
+            _,
+        ) = i
+        {
+            if let Expr::Path(expr_path) = func.as_ref() {
+                if expr_path.path.get_ident().is_some_and(|ident| ident == fn_ident) {
+                    args.push(Expr::Verbatim(quote! { _visited }))
+                }
+            }
+        }
+    }
 
     let new_block = quote! {
         {
-            let mut data_base = std::collections::HashMap::new();
-
             #inside
 
-            let result = inside(#(#args_ident),* , &mut data_base);
+            let mut data_base = std::collections::HashMap::new();
+
+            let result = #fn_ident(#(#args_ident),* , &mut data_base);
             data_base.insert((#(#args_ident),*), result.clone());
 
             result
         }
-    }.into();
+    }
+    .into();
 
     let new_block = parse_macro_input!(new_block as Block);
 
     input.block = Box::new(new_block);
 
-
     quote! {
         #input
-    }.into()
+    }
+    .into()
 }
