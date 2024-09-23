@@ -22,3 +22,6 @@ fn fib_global(i: usize) -> usize {
     }
 }
 ```
+
+Reference arguments is ignored.
+Please make arguments used to compare owned.
