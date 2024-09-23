@@ -1,39 +1,39 @@
 
 #[cache_rec::cache]
-fn fact(i: i32) -> i32 {
-    if i == 0 {
+fn fib(i: usize) -> usize {
+    if i == 0 || i == 1 {
         1
     } else {
-        i * fact(i-1)
+        fib(i-1) + fib(i-2)
     }
 }
 
 #[test]
 fn fact_test() {
-    dbg!(fact(5));
-    dbg!(fact(10));
+    dbg!(fib(30));
+    dbg!(fib(60));
 }
 
 #[cache_rec::cache_global]
-fn fact_global(i: i32) -> i32 {
-    if i == 0 {
+fn fib_global(i: usize) -> usize {
+    if i == 0 || i == 1 {
         1
     } else {
-        i * fact_global(i-1)
+        fib_global(i-1) + fib_global(i-2)
     }
 }
 
 #[cache_rec::cache_global]
-fn fact_global2(i: i32) -> i32 {
-    if i == 0 {
+fn fib_global2(i: usize) -> usize {
+    if i == 0 || i == 1 {
         1
     } else {
-        i * fact_global2(i-1)
+        fib_global2(i-1) + fib_global2(i-2)
     }
 }
 
 #[test]
 fn fact_global_test() {
-    dbg!(fact_global(8));
-    dbg!(fact_global2(3));
+    dbg!(fib_global(45));
+    dbg!(fib_global2(50));
 }
