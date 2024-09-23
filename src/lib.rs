@@ -55,6 +55,9 @@ fn cache_block(input: TokenStream) -> TokenStream {
 
     for i in inputs {
         if let FnArg::Typed(ty) = i {
+            if let Type::Ptr(_) | Type::Reference(_) = *ty.ty {
+                continue;
+            }
             tuple_args.push(ty.ty.to_owned());
             args_ident.push(ty.pat.to_owned());
         }
@@ -114,6 +117,7 @@ fn cache_block(input: TokenStream) -> TokenStream {
                     std::collections::HashMap::new()
                 )
             }
+
             #[allow(non_upper_case_globals)]
             static #database_ident: std::sync::LazyLock<std::sync::Mutex<std::collections::HashMap<#args_type, #return_type>>> =
                 std::sync::LazyLock::new(#constructor_ident);
