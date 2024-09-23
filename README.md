@@ -3,22 +3,22 @@
 ## Usage
 ```rs
 #[cache_rec::cache]
-fn fact(i: i32) -> i32 {
-    if i == 0 {
+fn fib(i: usize) -> usize {
+    if i == 0 || i == 1 {
         1
     } else {
-        i * fact(i-1)
+        fib(i-1) + fib(i-2)
     }
 }
 ```
 
 ```rs
 #[cache_rec::cache_global]
-fn fact(i: i32) -> i32 {
-    if i == 0 {
+fn fib_global(i: usize) -> usize {
+    if i == 0 || i == 1 {
         1
     } else {
-        i * fact(i-1)
+        fib_global(i-1) + fib_global(i-2)
     }
 }
 ```
