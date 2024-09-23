@@ -1,14 +1,14 @@
 
 #[cache_rec::cacher]
-fn hello(i: i32) -> i32 {
+fn fact(i: i32) -> i32 {
     if i == 0 {
-        i
+        1
     } else {
-        hello(i-1)
+        i * fact(i-1)
     }
 }
 
 #[test]
-fn expand() {
-    hello(100);
+fn fact_test() {
+    fact(5);
 }

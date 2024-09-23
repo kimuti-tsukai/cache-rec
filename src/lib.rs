@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Block, Expr, ExprCall, FnArg, ItemFn, ReturnType, Stmt, Type};
+use syn::{parse_macro_input, Block, FnArg, ItemFn, ReturnType, Type};
 
 #[proc_macro_attribute]
 pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
@@ -39,44 +39,42 @@ pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
         ReturnType::Type(_, t) => t.to_owned(),
     });
 
-    let new_arg = quote! {
-        _visited: &mut std::collections::HashMap<#args_type, #return_type>
+    let fn_ident = &inside.sig.ident;
+
+    let inside_block = &inside.block;
+
+    let inside_block = quote! {
+        {
+            if let Some(result) = DATA_BASE.lock().unwrap().get(&(#(#args_ident),*)) {
+                return result.to_owned()
+            }
+
+            let result = #inside_block;
+
+            DATA_BASE.lock().unwrap().insert((#(#args_ident),*), result.clone());
+
+            result
+        }
     }
     .into();
 
-    inside.sig.inputs.push(parse_macro_input!(new_arg as FnArg));
+    let inside_block = parse_macro_input!(inside_block as Block);
 
-    let fn_ident = &inside.sig.ident;
-
-    for i in &mut inside.block.stmts {
-        if let Stmt::Expr(
-            Expr::Call(ExprCall {
-                attrs: _,
-                func,
-                paren_token: _,
-                args,
-            }),
-            _,
-        ) = i
-        {
-            if let Expr::Path(expr_path) = func.as_ref() {
-                if expr_path.path.get_ident().is_some_and(|ident| ident == fn_ident) {
-                    args.push(Expr::Verbatim(quote! { _visited }))
-                }
-            }
-        }
-    }
+    inside.block = Box::new(inside_block);
 
     let new_block = quote! {
         {
+            fn constructor() -> std::sync::Mutex<std::collections::HashMap<#args_type, #return_type>> {
+                std::sync::Mutex::new(
+                    std::collections::HashMap::new()
+                )
+            }
+            static DATA_BASE: std::sync::LazyLock<std::sync::Mutex<std::collections::HashMap<#args_type, #return_type>>>
+             = std::sync::LazyLock::new(constructor);
+
             #inside
 
-            let mut data_base = std::collections::HashMap::new();
-
-            let result = #fn_ident(#(#args_ident),* , &mut data_base);
-            data_base.insert((#(#args_ident),*), result.clone());
-
-            result
+            #fn_ident(#(#args_ident),*)
         }
     }
     .into();
