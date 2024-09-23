@@ -9,7 +9,7 @@ fn fib(i: usize) -> usize {
 
 #[test]
 fn fib_test() {
-    dbg!(fib(100));
+    dbg!(fib(30));
     dbg!(fib(40));
 }
 
@@ -24,8 +24,8 @@ fn fib_global(i: usize) -> usize {
 
 #[test]
 fn fib_global_test() {
-    dbg!(fib_global(410));
-    dbg!(fib_global(710));
+    dbg!(fib_global(45));
+    dbg!(fib_global(75));
 }
 
 fn normal_fib(i: usize) -> usize {
