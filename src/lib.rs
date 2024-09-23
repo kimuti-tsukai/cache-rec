@@ -8,8 +8,6 @@ pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
 
     let mut inside = input.clone();
 
-    // dbg!(&input);
-
     let sig = &input.sig;
 
     let inputs = &sig.inputs;
