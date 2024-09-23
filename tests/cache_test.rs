@@ -19,7 +19,7 @@ fn fact_global(i: i32) -> i32 {
     if i == 0 {
         1
     } else {
-        i * fact(i-1)
+        i * fact_global(i-1)
     }
 }
 
@@ -28,7 +28,7 @@ fn fact_global2(i: i32) -> i32 {
     if i == 0 {
         1
     } else {
-        i * fact(i-1)
+        i * fact_global2(i-1)
     }
 }
 
