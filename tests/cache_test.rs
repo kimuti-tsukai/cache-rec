@@ -1,5 +1,5 @@
 
-#[cache_rec::cacher]
+#[cache_rec::cache]
 fn fact(i: i32) -> i32 {
     if i == 0 {
         1
@@ -14,7 +14,7 @@ fn fact_test() {
     dbg!(fact(10));
 }
 
-#[cache_rec::global_cacher]
+#[cache_rec::cache_global]
 fn fact_global(i: i32) -> i32 {
     if i == 0 {
         1
@@ -23,7 +23,7 @@ fn fact_global(i: i32) -> i32 {
     }
 }
 
-#[cache_rec::global_cacher]
+#[cache_rec::cache_global]
 fn fact_global2(i: i32) -> i32 {
     if i == 0 {
         1

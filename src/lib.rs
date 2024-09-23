@@ -4,8 +4,8 @@ use quote::quote;
 use syn::{parse, parse2, parse_macro_input, Block, FnArg, Ident, ItemFn, ReturnType, Type};
 
 #[proc_macro_attribute]
-pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let mut new_block = parse::<Block>(block_cacher(input.clone())).unwrap();
+pub fn cache(_args: TokenStream, input: TokenStream) -> TokenStream {
+    let mut new_block = parse::<Block>(cache_block(input.clone())).unwrap();
 
     let mut input: ItemFn = parse_macro_input!(input as ItemFn);
 
@@ -32,8 +32,8 @@ pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn global_cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let block = parse::<Block>(block_cacher(input)).unwrap();
+pub fn cache_global(_args: TokenStream, input: TokenStream) -> TokenStream {
+    let block = parse::<Block>(cache_block(input)).unwrap();
 
     let block_body = block.stmts;
 
@@ -43,7 +43,7 @@ pub fn global_cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
     .into()
 }
 
-fn block_cacher(input: TokenStream) -> TokenStream {
+fn cache_block(input: TokenStream) -> TokenStream {
     let mut input = parse_macro_input!(input as ItemFn);
 
     let sig = &input.sig;
