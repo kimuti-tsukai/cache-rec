@@ -93,7 +93,7 @@ fn cache_block(input: TokenStream) -> TokenStream {
                 return result.to_owned()
             }
 
-            let result = (|| #inside_block)();
+            let result = (move || #inside_block)();
 
             #database_ident.lock().unwrap().insert((#(#args_ident),*), result.clone());
 
