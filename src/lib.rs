@@ -47,7 +47,7 @@ pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
                 return result.to_owned()
             }
 
-            let result = #inside_block;
+            let result = (|| #inside_block)();
 
             DATA_BASE.lock().unwrap().insert((#(#args_ident),*), result.clone());
 
@@ -67,8 +67,8 @@ pub fn cacher(_args: TokenStream, input: TokenStream) -> TokenStream {
                     std::collections::HashMap::new()
                 )
             }
-            static DATA_BASE: std::sync::LazyLock<std::sync::Mutex<std::collections::HashMap<#args_type, #return_type>>>
-             = std::sync::LazyLock::new(constructor);
+            static DATA_BASE: std::sync::LazyLock<std::sync::Mutex<std::collections::HashMap<#args_type, #return_type>>> =
+             std::sync::LazyLock::new(constructor);
 
             #inside
 
