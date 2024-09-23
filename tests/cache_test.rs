@@ -11,6 +11,7 @@ fn fact(i: i32) -> i32 {
 #[test]
 fn fact_test() {
     dbg!(fact(5));
+    dbg!(fact(10));
 }
 
 #[cache_rec::global_cacher]
