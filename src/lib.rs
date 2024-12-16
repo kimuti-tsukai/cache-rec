@@ -80,11 +80,7 @@ fn cache_block(input: TokenStream) -> TokenStream {
 
     let fn_ident = input.sig.ident.clone().to_string();
 
-    let constructor_ident_string = String::from("_constructor_") + &fn_ident;
-
-    let constructor_ident = Ident::new(&constructor_ident_string, Span::call_site());
-
-    let database_ident_string = String::from("_DATA_BASE_") + &fn_ident;
+    let database_ident_string = String::from("__DATA_BASE_") + &fn_ident;
 
     let database_ident = Ident::new(&database_ident_string, Span::call_site());
 
@@ -111,16 +107,16 @@ fn cache_block(input: TokenStream) -> TokenStream {
 
     quote! {
         {
-            #[allow(non_snake_case)]
-            fn #constructor_ident() -> std::sync::Mutex<std::collections::HashMap<#args_type, #return_type>> {
-                std::sync::Mutex::new(
-                    std::collections::HashMap::new()
-                )
-            }
-
             #[allow(non_upper_case_globals)]
             static #database_ident: std::sync::LazyLock<std::sync::Mutex<std::collections::HashMap<#args_type, #return_type>>> =
-                std::sync::LazyLock::new(#constructor_ident);
+                std::sync::LazyLock::new({
+                    fn inner() -> std::sync::Mutex<std::collections::HashMap<#args_type, #return_type>> {
+                        std::sync::Mutex::new(
+                            std::collections::HashMap::new()
+                        )
+                    }
+                    inner
+                });
 
             #input
         }
